@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Innomotive LLC - Medical Devices</title>
+    
+    <!-- 1. Tailwind CSS for Styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- 2. React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    
+    <!-- 3. Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Google Fonts (Inter) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        /* Smooth Fade In Animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fadeIn {
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <!-- Root Element for React -->
+    <div id="root"></div>
+
+    <!-- REACT APPLICATION SCRIPT -->
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        // --- ICONS (SVG Paths) ---
+        const Icons = {
+            Phone: () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>,
+            Mail: () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>,
+            ChevronRight: () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>,
+            Play: () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>,
+            Check: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>,
+            Activity: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>,
+            Shield: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>,
+            MapPin: () => <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>,
+            Download: () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+        };
+
+        // --- CONFIGURATION ---
+        
+        const THEME_BLUE = "bg-[#004e86]";
+        const THEME_BLUE_HOVER = "hover:bg-[#003b66]";
+        const THEME_TEXT_BLUE = "text-[#004e86]";
+        const THEME_BORDER_BLUE = "border-[#004e86]";
+
+        // IMPORTANT: Ensure your logo is named 'logo.png' in the same folder
+        const LOGO_URL = "./logo.png"; 
+
+        const COMPANY = {
+            name: "INNOMOTIVE LLC",
+            address: "325 E Grand River Ave, East Lansing, MI 48823 USA",
+            phone: "(248) 227-3408",
+            email: "tinventor@gmail.com",
+        };
+
+        const PRODUCTS = [
+            {
+                id: 'ezlyft',
+                name: 'EzLyft',
+		image: './EzLyft.jpg',
+                price: 20000,
+                category: 'Robotic Patient Transfer',
+                videoUrl: 'https://youtu.be/j2e6NfEr2EM?feature=shared',
+                shortDesc: 'A robotic scooter that lifts patients from a seated position, supports standing, and enables secure mobility.',
+                fullDesc: 'EzLyft is a revolutionary robotic standing scooter designed to restore independence. It gently lifts users from a seated position to a supported standing position using a comfortable medical harness. Once standing, the user can navigate their environment using a joystick control, allowing for independent cooking, toileting, and social interaction without caregiver assistance. It features a dedicated Red Emergency Stop Button for immediate safety.',
+                specs: [
+                    { label: 'Max Load', value: '300 lbs' },
+                    { label: 'Safety', value: 'Red Emergency Stop Button' },
+                    { label: 'Operation', value: 'Patient-Controlled Joystick' },
+                    { label: 'Power', value: 'Rechargeable Battery' },
+                    { label: 'Functions', value: 'Sit-to-Stand, Standing Mobility' }
+                ],
+                benefits: [
+                    'Enables independent toileting and hygiene.',
+                    'Prevents pressure ulcers and osteoporosis by reducing sitting time.',
+                    'Improves cardiopulmonary function through vertical positioning.',
+                    'Reduces caregiver back strain and injury risk.',
+                    'Boosts patient psychological well-being and dignity.'
+                ],
+                comparison: [
+                    { feature: 'Mobility', us: 'Drive while standing (Joystick)', them: 'Stationary or pushed by nurse' },
+                    { feature: 'Independence', us: '100% Patient operated', them: 'Requires 1-2 caregivers' },
+                    { feature: 'Safety', us: 'Emergency Stop + Harness', them: 'Basic belt only' },
+                    { feature: 'Setup Time', us: 'Instant (Harness & Go)', them: 'Complex setup/strapping' }
+                ]
+            },
+            {
+                id: 'liftwalk',
+                name: 'LiftWalk',
+		image: './liftWalk.jpg',
+                price: 6000,
+                category: '3-in-1 Hybrid System',
+                videoUrl: 'https://youtu.be/90UGtJfQ4Rs?feature=shared',
+                shortDesc: 'The ultimate 3-in-1 solution: Transfer Lift, Standing Table, and Gait Trainer in a single space-saving device.',
+                fullDesc: 'LiftWalk saves money and space by combining three essential rehab devices into one. 1) Transfer Lift: With the footboard flat, caregivers can transfer dependent patients to the toilet. 2) Standing Table: Holds paraplegic patients upright for osteoporosis prevention. 3) Gait Trainer: With the footboard flipped up, patients can practice walking independently. It features a Red Emergency Stop Button for maximum safety.',
+                specs: [
+                    { label: 'Function 1', value: 'Caregiver Transfer Lift' },
+                    { label: 'Function 2', value: 'Osteoporosis Standing Frame' },
+                    { label: 'Function 3', value: 'Gait Trainer (Flip-up Footboard)' },
+                    { label: 'Safety', value: 'Red Emergency Stop Button' },
+                    { label: 'Max Load', value: '300 lbs' }
+                ],
+                benefits: [
+                    'Cost Savings: Replaces 3 separate expensive machines.',
+                    'Space Savings: One footprint for the entire rehab journey.',
+                    'Versatility: From total care (toileting) to independent walking.',
+                    'Health: Prevents osteoporosis via supported standing mode.',
+                    'Safety: Emergency Stop button for immediate halt.'
+                ],
+                comparison: [
+                    { feature: 'Functionality', us: '3-in-1 (Lift + Stand + Walk)', them: 'Single function only' },
+                    { feature: 'Footboard', us: 'Flip-up (Walk) / Flat (Stand)', them: 'Fixed or None' },
+                    { feature: 'Patient Control', us: 'Self-operated lift', them: 'Nurse operated' },
+                    { feature: 'Cost Efficiency', us: 'Buy 1 Device', them: 'Buy 3 Devices' }
+                ]
+            },
+            {
+                id: 'ridenwalk',
+                name: 'RideNWalk',
+		image: './RideNwalk.jpg',
+                price: 2000,
+                category: 'Rehabilitation Walker',
+                videoUrl: 'https://youtu.be/B94BxP2YQRg?feature=shared',
+                shortDesc: 'A walker with an ischial tuberosity weight-bearing seat and elbow support.',
+                fullDesc: 'RideNWalk is designed for patients with poor endurance, amputation, or fall risks. It features a unique "reverse tricycle" design with a specialized seat that bears weight on the ischial tuberosity (sit bones). This allows the patient to walk while partially seated, or rest immediately without fear of falling. It includes an IV pole mount and basket for hospital utility.',
+                specs: [
+                    { label: 'Seat', value: 'Auto-Raised Sandal Seat' },
+                    { label: 'Weight Relief', value: 'Up to 70% body weight' },
+                    { label: 'Structure', value: 'Reverse Tricycle /w Casters' },
+                    { label: 'Accessories', value: 'IV Pole, Basket, O2 Holder' }
+                ],
+                benefits: [
+                    'Eliminates fatigue-related falls during therapy.',
+                    'Perfect for post-amputation early gait (pre-prosthetic).',
+                    'Allows cancer rehab patients to move safely.',
+                    'Therapists no longer need to follow with a wheelchair.',
+                    'Supports upright posture for better breathing and digestion.'
+                ],
+                comparison: [
+                    { feature: 'Fatigue Management', us: 'Walk & Sit simultaneously', them: 'Must stop walking to sit' },
+                    { feature: 'Safety', us: 'Impossible to fall backward', them: 'High fall risk if dizzy' },
+                    { feature: 'Support', us: 'Elbow & Pelvic support', them: 'Hand grip only' },
+                    { feature: 'Target User', us: 'Amputee, Oncology, Stroke', them: 'General frailty only' }
+                ]
+            },
+            {
+                id: 'mouthflex',
+                name: 'MouthFlex',
+		image: './mouthFlex.jpg',
+                price: 150,
+                category: 'Oral Rehabilitation',
+                videoUrl: null,
+                shortDesc: 'Dual-function oral-facial trainer for jaw opening and lip stretching.',
+                fullDesc: 'MouthFlex (also known as MouthFlex Pro) is a compact, portable therapy device for patients suffering from trismus (lockjaw), TMJ disorders, or facial burns. Unlike competitors, it offers dual functionality: vertical jaw stretching and horizontal lip stretching. It operates in two modes: Fixed Distance (screw) for static stretching and Fixed Force (rubber band) for dynamic therapy.',
+                specs: [
+                    { label: 'Modes', value: 'Static (Screw) & Dynamic (Band)' },
+                    { label: 'Functions', value: 'Jaw Opening + Lip Stretching' },
+                    { label: 'Material', value: 'Medical Grade, Easy Clean' },
+                    { label: 'Weight', value: '< 4 oz (Pocket Sized)' }
+                ],
+                benefits: [
+                    'Restores mouth opening (ROM) after radiation or surgery.',
+                    'Improves lip flexibility for speech and feeding.',
+                    'Patient-controlled therapy increases compliance.',
+                    'Portable design allows for therapy anywhere, anytime.',
+                    'Significantly more affordable than traditional screw devices.'
+                ],
+                comparison: [
+                    { feature: 'Functions', us: 'Jaw AND Lip stretching', them: 'Jaw only' },
+                    { feature: 'Therapy Modes', us: 'Static & Dynamic', them: 'Static only' },
+                    { feature: 'Portability', us: 'Pocket-sized', them: 'Bulky / Tabletop' },
+                    { feature: 'Price', us: '$150', them: '$600+' }
+                ]
+            },
+            {
+                id: 'quickbrace',
+                name: 'QuickBrace',
+                price: 20,
+                category: 'Orthopedics',
+                videoUrl: null,
+                shortDesc: 'Rapid-application velcro brace for wrist fracture immobilization.',
+                fullDesc: 'The QuickBrace is designed for speed and hygiene. It utilizes a loop Velcro base with longitudinal aluminum strips for rigid stability. The color-coded corded straps (blue/black) allow for instant tightening and configuration. It is breathable, washable, and radiolucent, making it a superior alternative to traditional heavy casts for certain fractures.',
+                specs: [
+                    { label: 'Structure', value: 'Aluminum & Loop Velcro' },
+                    { label: 'Adjustment', value: 'Pull-tab Quick Tighten' },
+                    { label: 'Hygiene', value: 'Washable & Breathable' },
+                    { label: 'Application', value: 'Wrist Fracture / Sprain' }
+                ],
+                benefits: [
+                    'Applied in seconds with color-coded straps.',
+                    'Breathable material reduces skin irritation and odor.',
+                    'Removable for hygiene (with doctor approval).',
+                    'Configurable as a sling if needed.',
+                    'Low cost and high durability.'
+                ],
+                comparison: [
+                    { feature: 'Application Speed', us: 'Seconds', them: 'Minutes (Plaster/Fiberglass)' },
+                    { feature: 'Hygiene', us: 'Washable', them: 'Cannot get wet' },
+                    { feature: 'Comfort', us: 'Breathable, Lightweight', them: 'Heavy, itchy, hot' },
+                    { feature: 'Adjustability', us: 'Instant adjustment', them: 'Requires saw to remove' }
+                ]
+            }
+        ];
+
+        // --- COMPONENTS ---
+
+        const Header = ({ activeProduct, setActiveProduct }) => (
+            <header className="sticky top-0 z-50 bg-white border-b border-slate-200 shadow-sm">
+                <div className={`${THEME_BLUE} text-white py-1 px-4 text-xs font-medium tracking-wide`}>
+                    <div className="max-w-7xl mx-auto flex justify-between items-center">
+                        <span>FDA REGISTERED MEDICAL DEVICE MANUFACTURER</span>
+                        <div className="flex gap-4">
+                            <span className="flex items-center gap-1"><Icons.Phone /> {COMPANY.phone}</span>
+                            <span className="flex items-center gap-1"><Icons.Mail /> {COMPANY.email}</span>
+                        </div>
+                    </div>
+                </div>
+                <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div className="flex items-center gap-3 cursor-pointer" onClick={() => setActiveProduct('ezlyft')}>
+                        {/* LOGO */}
+                        <img src={LOGO_URL} alt="Promob Logo" className="h-12 w-auto object-contain" />
+                        <div>
+                            <h1 className="text-2xl font-bold text-slate-900 tracking-tight leading-none">{COMPANY.name}</h1>
+                            <span className="text-xs text-slate-500 uppercase tracking-wider">Revolutionizing Mobility</span>
+                        </div>
+                    </div>
+                    
+                    {/* Product Nav */}
+                    <nav className="flex flex-wrap gap-2">
+                        {PRODUCTS.map((prod) => (
+                            <button
+                                key={prod.id}
+                                onClick={() => setActiveProduct(prod.id)}
+                                className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 ${
+                                    activeProduct === prod.id 
+                                        ? `${THEME_BLUE} text-white shadow-md transform scale-105` 
+                                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                                }`}
+                            >
+                                {prod.name}
+                            </button>
+                        ))}
+                    </nav>
+                </div>
+            </header>
+        );
+
+        const Hero = ({ product }) => (
+            <div className="bg-gradient-to-r from-slate-50 to-white border-b border-slate-200">
+                <div className="max-w-7xl mx-auto px-4 py-10 md:py-16 grid md:grid-cols-2 gap-10 items-center">
+                    <div>
+                        <div className="inline-block px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-bold mb-4 uppercase tracking-wide">
+                            {product.category}
+                        </div>
+                        
+                        <h2 className={`text-3xl md:text-4xl font-bold ${THEME_TEXT_BLUE} mb-4`}>{product.name}</h2>
+                        
+                        <p className="text-lg text-slate-600 mb-6 leading-relaxed">
+                            {product.shortDesc}
+                        </p>
+                        <div className="flex items-center gap-4 mb-8">
+                            <span className="text-2xl font-bold text-slate-900">${product.price.toLocaleString()}</span>
+                            <span className="text-sm text-slate-500">MSRP / Institutional Pricing Available</span>
+                        </div>
+                        
+                        <div className="flex flex-wrap gap-4">
+                            <button className={`flex items-center gap-2 ${THEME_BLUE} ${THEME_BLUE_HOVER} text-white px-6 py-2 rounded-lg font-semibold transition shadow-lg`}>
+                                Request Quote <Icons.ChevronRight />
+                            </button>
+                            {product.videoUrl && (
+                                <a 
+                                    href={product.videoUrl} 
+                                    target="_blank" 
+                                    rel="noreferrer"
+                                    className="flex items-center gap-2 bg-white text-slate-700 border border-slate-300 px-6 py-2 rounded-lg font-semibold hover:bg-slate-50 transition"
+                                >
+                                    <Icons.Play /> Watch Video
+                                </a>
+                            )}
+                        </div>
+                    </div>
+                    
+                    <div className="relative">
+                        {/* PRODUCT IMAGE PLACEHOLDER */}
+			<div className="aspect-[4/3] bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xl relative group">
+    				{/* This loads the image you defined above */}
+   				<img 
+        				src={product.image || 							"https://via.placeholder.com/800x600?text=No+Image"} 
+        				alt={product.name} 
+        				className="w-full h-full object-cover"
+    				/>
+    				<div className="absolute inset-0 bg-gradient-to-tr from-[#004e86]/10 to-transparent pointer-events-none">
+			</div>
+			</div>
+                            <div className={`absolute inset-0 bg-gradient-to-tr from-[#004e86]/10 to-transparent pointer-events-none`}></div>
+                        </div>
+                        
+                        <div className="absolute -bottom-6 -left-6 bg-white p-4 rounded-xl shadow-lg border border-slate-100 flex items-center gap-3">
+                            <div className="bg-green-100 p-2 rounded-full text-green-700">
+                                <Icons.Shield />
+                            </div>
+                            <div>
+                                <p className="text-xs text-slate-500 uppercase font-bold">Safety Rated</p>
+                                <p className="text-sm font-bold text-slate-900">Clinically Proven</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+
+        const ProductTabs = ({ activeTab, setActiveTab }) => (
+            <div className="border-b border-slate-200 bg-white sticky top-[138px] md:top-[85px] z-40 shadow-sm">
+                <div className="max-w-7xl mx-auto px-4 flex gap-8 overflow-x-auto">
+                    {['Introduction', 'Comparison', 'Benefits'].map((tab) => (
+                        <button
+                            key={tab}
+                            onClick={() => setActiveTab(tab)}
+                            className={`py-4 text-sm font-bold uppercase tracking-wide border-b-2 transition-colors whitespace-nowrap ${
+                                activeTab === tab 
+                                    ? `${THEME_BORDER_BLUE} ${THEME_TEXT_BLUE}` 
+                                    : 'border-transparent text-slate-500 hover:text-slate-800'
+                            }`}
+                        >
+                            {tab}
+                        </button>
+                    ))}
+                </div>
+            </div>
+        );
+
+        const IntroductionView = ({ product }) => (
+            <div className="grid md:grid-cols-3 gap-8 animate-fadeIn">
+                <div className="md:col-span-2">
+                    <h3 className="text-2xl font-bold text-slate-900 mb-4">Product Overview</h3>
+                    <p className="text-lg text-slate-700 leading-relaxed mb-6">
+                        {product.fullDesc}
+                    </p>
+                    
+                    <h4 className="text-lg font-bold text-slate-900 mb-3">Technical Specifications</h4>
+                    <div className="bg-slate-50 rounded-xl p-6 border border-slate-200">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8">
+                            {product.specs.map((spec, idx) => (
+                                <div key={idx} className="flex justify-between border-b border-slate-200 pb-2 last:border-0">
+                                    <span className="text-slate-500 font-medium">{spec.label}</span>
+                                    <span className="text-slate-900 font-bold">{spec.value}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+                
+                <div className={`${THEME_BLUE} text-white p-8 rounded-2xl h-fit`}>
+                    <h4 className="text-xl font-bold mb-4 flex items-center gap-2">
+                        <Icons.Download /> Downloads
+                    </h4>
+                    <ul className="space-y-4">
+			<li className="flex items-center justify-between border-b border-white/20 pb-2 cursor-pointer hover:text-blue-200 transition">
+    				{/* This links to the PDF file */}
+    				<a href={`./${EzLyft}-brochure.pdf`} 
+			target="_blank" className="flex-1 flex justify-between items-center">
+       					<span>Brochure (PDF)</span>
+        				<Icons.ChevronRight />
+    				</a>
+			</li>
+			<li className="flex items-center justify-between border-b border-white/20 pb-2 cursor-pointer hover:text-blue-200 transition">
+    				{/* This links to the PDF file */}
+    				<a href={`./${LiftWalk}-brochure.pdf`} 
+			target="_blank" className="flex-1 flex justify-between items-center">
+       					<span>Brochure (PDF)</span>
+        				<Icons.ChevronRight />
+    				</a>
+			</li>
+			<li className="flex items-center justify-between border-b border-white/20 pb-2 cursor-pointer hover:text-blue-200 transition">
+    				{/* This links to the PDF file */}
+    				<a href={`./${RideNWalk}-brochure.pdf`} 
+			target="_blank" className="flex-1 flex justify-between items-center">
+       					<span>Brochure (PDF)</span>
+        				<Icons.ChevronRight />
+    				</a>
+			</li>
+                    </ul>
+                    <div className="mt-8 pt-6 border-t border-white/20">
+                        <p className="text-sm opacity-80 mb-2">Need assistance?</p>
+                        <p className="font-bold text-lg">{COMPANY.phone}</p>
+                    </div>
+                </div>
+            </div>
+        );
+
+        const ComparisonView = ({ product }) => (
+            <div className="animate-fadeIn">
+                <h3 className="text-2xl font-bold text-slate-900 mb-2">Competitive Advantage</h3>
+                <p className="text-slate-600 mb-8">See how {product.name} outperforms traditional solutions.</p>
+                
+                <div className="overflow-hidden border border-slate-200 rounded-xl shadow-sm">
+                    <table className="w-full text-left border-collapse">
+                        <thead>
+                            <tr className="bg-slate-50 border-b border-slate-200">
+                                <th className="p-4 md:p-6 font-bold text-slate-500 uppercase text-xs tracking-wider w-1/3">Feature</th>
+                                <th className={`p-4 md:p-6 font-bold ${THEME_TEXT_BLUE} uppercase text-xs tracking-wider w-1/3 bg-blue-50/50`}>
+                                    {product.name} (Innomotive)
+                                </th>
+                                <th className="p-4 md:p-6 font-bold text-slate-400 uppercase text-xs tracking-wider w-1/3">
+                                    Standard Alternative
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {product.comparison.map((row, idx) => (
+                                <tr key={idx} className="border-b border-slate-100 last:border-0 hover:bg-slate-50 transition">
+                                    <td className="p-4 md:p-6 font-bold text-slate-800">{row.feature}</td>
+                                    <td className="p-4 md:p-6 text-slate-800 font-medium bg-blue-50/30 flex items-start gap-2">
+                                        <div className="text-green-600 shrink-0"><Icons.Check /></div>
+                                        {row.us}
+                                    </td>
+                                    <td className="p-4 md:p-6 text-slate-500">{row.them}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        );
+
+        const BenefitsView = ({ product }) => (
+            <div className="animate-fadeIn">
+                <div className="grid md:grid-cols-2 gap-12">
+                    <div>
+                        <h3 className="text-2xl font-bold text-slate-900 mb-6">Clinical & Lifestyle Benefits</h3>
+                        <ul className="space-y-4">
+                            {product.benefits.map((benefit, idx) => (
+                                <li key={idx} className="flex gap-4 items-start p-4 rounded-lg bg-white border border-slate-100 shadow-sm hover:shadow-md transition">
+                                    <div className="bg-blue-100 text-blue-700 p-2 rounded-full shrink-0">
+                                        <Icons.Activity />
+                                    </div>
+                                    <span className="text-slate-700 font-medium leading-relaxed">{benefit}</span>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                    <div className="bg-slate-50 rounded-2xl p-8 border border-slate-200 flex flex-col justify-center text-center">
+                        <h4 className={`text-xl font-bold ${THEME_TEXT_BLUE} mb-4`}>Why Choose Innomotive?</h4>
+                        <p className="text-slate-600 mb-6">
+                            Our products are designed by clinicians for clinicians. We prioritize early mobility, patient independence, and reducing caregiver burden.
+                        </p>
+                        <div className="flex flex-col gap-3">
+                            <div className="flex items-center gap-3 justify-center text-slate-700 font-medium">
+                                <span className={THEME_TEXT_BLUE}><Icons.Shield /></span> 
+                                FDA Class 1 Listed
+                            </div>
+                            <div className="flex items-center gap-3 justify-center text-slate-700 font-medium">
+                                <span className={THEME_TEXT_BLUE}><Icons.Activity /></span> 
+                                Designed by Physical Therapists
+                            </div>
+                            <div className="flex items-center gap-3 justify-center text-slate-700 font-medium">
+                                <span className={THEME_TEXT_BLUE}><Icons.Check /></span> 
+                                Patented Technology
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+
+        const Footer = () => (
+            <footer className={`${THEME_BLUE} text-slate-200 py-8 border-t border-white/10 mt-20`}>
+                <div className="max-w-7xl mx-auto px-4 grid md:grid-cols-4 gap-6 text-sm">
+                    <div className="col-span-1 md:col-span-2">
+                        <div className="flex items-center gap-2 mb-2">
+                            <img src={LOGO_URL} alt="Promob Logo Small" className="h-6 w-auto opacity-90 invert rounded" />
+                            <span className="text-lg font-bold text-white tracking-wide">{COMPANY.name}</span>
+                        </div>
+                        <p className="mb-4 max-w-sm text-blue-100 text-xs">
+                            Developing innovative, multifunctional assistive devices to empower self-care and facilitate community reintegration.
+                        </p>
+                        <div className="flex gap-4">
+                            <div className="w-8 h-8 bg-black/20 rounded-full flex items-center justify-center hover:bg-black/30 transition cursor-pointer">in</div>
+                            <div className="w-8 h-8 bg-black/20 rounded-full flex items-center justify-center hover:bg-black/30 transition cursor-pointer">yt</div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h5 className="text-white font-bold mb-3 text-xs uppercase tracking-wider opacity-80">Contact</h5>
+                        <ul className="space-y-2 text-xs">
+                            <li className="flex items-start gap-2">
+                                <span className="text-blue-200 mt-0.5"><Icons.MapPin /></span>
+                                <span>{COMPANY.address}</span>
+                            </li>
+                            <li className="flex items-center gap-2">
+                                <span className="text-blue-200"><Icons.Phone /></span>
+                                <span>{COMPANY.phone}</span>
+                            </li>
+                            <li className="flex items-center gap-2">
+                                <span className="text-blue-200"><Icons.Mail /></span>
+                                <span>{COMPANY.email}</span>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h5 className="text-white font-bold mb-3 text-xs uppercase tracking-wider opacity-80">Products</h5>
+                        <ul className="space-y-1 text-xs">
+                            {PRODUCTS.map(p => (
+                                <li key={p.id} className="hover:text-white transition cursor-pointer">{p.name}</li>
+                            ))}
+                        </ul>
+                    </div>
+                </div>
+                
+                <div className="max-w-7xl mx-auto px-4 mt-6 pt-2 pb-2 border-t border-white/10 text-center text-[10px] text-blue-200/60">
+                    &copy; {new Date().getFullYear()} {COMPANY.name}. All rights reserved. 
+                </div>
+            </footer>
+        );
+
+        function InnomotiveWebsite() {
+            const [activeProduct, setActiveProduct] = useState('ezlyft');
+            const [activeTab, setActiveTab] = useState('Introduction');
+            
+            const currentProduct = PRODUCTS.find(p => p.id === activeProduct) || PRODUCTS[0];
+
+            useEffect(() => {
+                setActiveTab('Introduction');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }, [activeProduct]);
+
+            return (
+                <div className="min-h-screen bg-white font-sans text-slate-800">
+                    <Header activeProduct={activeProduct} setActiveProduct={setActiveProduct} />
+                    
+                    <main>
+                        <Hero product={currentProduct} />
+                        
+                        <ProductTabs activeTab={activeTab} setActiveTab={setActiveTab} />
+                        
+                        <div className="max-w-7xl mx-auto px-4 py-12 min-h-[500px]">
+                            {activeTab === 'Introduction' && <IntroductionView product={currentProduct} />}
+                            {activeTab === 'Comparison' && <ComparisonView product={currentProduct} />}
+                            {activeTab === 'Benefits' && <BenefitsView product={currentProduct} />}
+                        </div>
+                    </main>
+
+                    <Footer />
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<InnomotiveWebsite />);
+    </script>
+</body>
+</html>
